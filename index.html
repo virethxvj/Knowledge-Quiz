@@ -1,168 +1,369 @@
-<!DOCTYPE html>  <html lang="es">  
-<head>  
-<meta charset="UTF-8">  
-<meta name="viewport" content="width=device-width, initial-scale=1">  
-<title>Knowledge Quiz</title>  
-<style>  
-*{box-sizing:border-box}  
-body{margin:0;font-family:Arial,sans-serif;color:#263b58;background:linear-gradient(#dceeff,#f7faff);min-height:100vh}  
-header{text-align:center;padding:35px 16px;background:linear-gradient(145deg,#9bc7ee,#d9eaff)}  
-h1{margin:0;font-size:32px}  
-header p{margin-bottom:0}  
-main{max-width:650px;margin:24px auto;padding:0 14px}  
-.card{background:#ffffffed;border:1px solid #d3e4f7;border-radius:22px;padding:22px;margin-bottom:18px;box-shadow:0 8px 25px #7197b51c}  
-h2{margin-top:0}  
-label{display:block;margin:14px 0 6px;font-weight:bold}  
-input,textarea,select{width:100%;padding:12px;border:1px solid #c4d8ed;border-radius:11px;font-size:16px;background:white}  
-button{border:0;border-radius:12px;padding:13px 17px;background:#527fb8;color:white;font-weight:bold;font-size:15px;margin-top:14px;cursor:pointer}  
-button.secondary{background:#e4effc;color:#345d8e}  
-.option{display:block;padding:10px;background:#eef5fd;border-radius:10px;margin:8px 0;font-weight:normal}  
-.option input{width:auto;margin-right:8px}  
-.question{border-top:1px solid #dce8f5;margin-top:18px;padding-top:12px}  
-small{color:#627d9b}  
-.hidden{display:none}  
-</style>  
-</head>  
-<body>  
-<header>  
-  <h1>☁️ Knowledge Quiz</h1>  
-  <p>¿A ver qué tanto te conocen? 💙</p>  
-</header>  
-<main>  
-  <section class="card" id="home">  
-    <h2>🌸 Crea tu propio quiz</h2>  
-    <p>Prepara preguntas, comparte tu quiz y reta a tus amigos.</p>  
-    <label>Tu nombre</label>  
-    <input id="creator" placeholder="¿Cómo te llamas?">  
-    <label>Nombre del quiz</label>  
-    <input id="quizTitle" placeholder="¿Qué tanto me conocen?">  
-    <label>Decoración</label>  
-    <select id="theme">  
-      <option value="blue">Cielo azul</option>  
-      <option value="pink">Cerezo rosado</option>  
-      <option value="sunset">Atardecer</option>  
-    </select>  
-    <button onclick="startCreator()">Crear preguntas</button>  
-  </section>    <section class="card hidden" id="editor">  
-    <h2 id="editorTitle">Mis preguntas</h2>  
-    <small>Máximo 15 preguntas. Marca la respuesta correcta.</small>  
-    <div id="questions"></div>  
-    <button class="secondary" onclick="addQuestion()">＋ Añadir pregunta</button>  
-    <button onclick="makeLink()">Crear enlace para compartir</button>  
-    <div id="shareArea"></div>  
-    <button class="secondary" onclick="goHome()">Volver al inicio</button>  
-  </section>    <section class="card hidden" id="participant">  
-    <h2 id="participantTitle">¡A responder!</h2>  
-    <p id="madeBy"></p>  
-    <label>Tu nombre</label>  
-    <input id="playerName" placeholder="Escribe tu nombre">  
-    <label>Tu bias de BTS</label>  
-    <select id="bias">  
-      <option value="">Elige tu bias</option>  
-      <option>RM</option><option>Jin</option><option>SUGA</option>  
-      <option>j-hope</option><option>Jimin</option>  
-      <option>V</option><option>Jungkook</option>  
-    </select>  
-    <div id="answerQuestions"></div>  
-    <button onclick="submitAnswers()">Ver mi puntuación</button>  
-    <div id="scoreArea"></div>  
-  </section>  
-</main>  
-<script>  
-let quiz={creator:"",title:"",theme:"blue",questions:[]};  
-let currentQuestions=[];  function show(id){
-["home","editor","participant"].forEach(x=>
-document.getElementById(x).classList.toggle("hidden",x!==id));
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Knowledge Quiz</title>
+<style>
+*{box-sizing:border-box}
+body{
+ margin:0;font-family:Arial,sans-serif;color:#263b58;
+ background:linear-gradient(135deg,#dceeff,#f8faff,#d8e8ff);
+ min-height:100vh
 }
-function startCreator(){
-quiz.creator=document.getElementById("creator").value.trim();
-quiz.title=document.getElementById("quizTitle").value.trim();
-quiz.theme=document.getElementById("theme").value;
-if(!quiz.creator||!quiz.title){alert("Escribe tu nombre y el título del quiz.");return;}
-quiz.questions=[];
-document.getElementById("editorTitle").textContent=quiz.title;
-document.getElementById("questions").innerHTML="";
-document.getElementById("shareArea").innerHTML="";
-addQuestion();
-addQuestion();
-show("editor");
+header{
+ text-align:center;padding:28px 14px;
+ background:linear-gradient(135deg,#8bb9f0,#d8e9ff);
+ border-bottom:2px solid #fff
 }
-function addQuestion(){
-if(quiz.questions.length>=15){alert("El máximo es 15 preguntas.");return;}
-let i=quiz.questions.length;
-quiz.questions.push({text:"",answers:["","","",""],correct:0});
-let div=document.createElement("div");
-div.className="question";
-div.id="q"+i;
-div.innerHTML=<h3>Pregunta ${i+1}</h3>   <label>Escribe la pregunta</label>   <input id="qt${i}" placeholder="Tu pregunta...">   ${[0,1,2,3].map(n=><label>Respuesta ${n+1}</label>
-<input id="qa${i}_${n}" placeholder="Escribe una respuesta">).join("")}   <label>Respuesta correcta</label>   <select id="qc${i}"><option value="0">Respuesta 1</option><option value="1">Respuesta 2</option><option value="2">Respuesta 3</option><option value="3">Respuesta 4</option></select>;
-document.getElementById("questions").appendChild(div);
+header h1{margin:0;font-size:30px}
+header p{margin:8px 0 0}
+main{max-width:720px;margin:20px auto;padding:12px}
+.card{
+ background:#ffffffed;border-radius:20px;padding:20px;
+ margin-bottom:18px;box-shadow:0 5px 18px #567ba322
 }
-function collectQuiz(){
-quiz.questions=quiz.questions.map((q,i)=>({
-text:document.getElementById("qt"+i).value.trim(),
-answers:[0,1,2,3].map(n=>document.getElementById(qa${i}_${n}).value.trim()),
-correct:Number(document.getElementById("qc"+i).value)
-}));
-return quiz.questions.every(q=>q.text&&q.answers.every(a=>a));
+h2{color:#396ba6}
+input,select,textarea{
+ width:100%;padding:12px;margin:7px 0 13px;
+ border:1px solid #c5d9f1;border-radius:10px;
+ font-size:16px;background:white;color:#263b58
 }
-function makeLink(){
-if(!collectQuiz()){alert("Completa todas las preguntas y sus cuatro respuestas.");return;}
-let encoded=btoa(unescape(encodeURIComponent(JSON.stringify(quiz))));
-let url=location.href.split("#")[0]+"#play="+encoded;
-document.getElementById("shareArea").innerHTML=
-<p>Tu enlace para compartir:</p><input id="shareLink" readonly value="${url}"><button onclick="copyLink()">Copiar enlace</button><p><small>Esta primera versión genera el enlace, pero todavía no guarda respuestas en línea.</small></p>;
+button{
+ border:0;border-radius:12px;padding:12px 16px;
+ background:#548dd2;color:white;font-size:16px;
+ font-weight:bold;cursor:pointer;margin:5px 3px
 }
-function copyLink(){
-let field=document.getElementById("shareLink");
-field.select();
-if(navigator.clipboard){navigator.clipboard.writeText(field.value).then(()=>alert("¡Enlace copiado!")).catch(()=>alert("Mantén pulsado el enlace para copiarlo."));}
-else alert("Mantén pulsado el enlace para copiarlo.");
+button.secondary{background:#e2edfb;color:#315b8d}
+button:disabled{opacity:.6}
+.hidden{display:none!important}
+.small{font-size:13px;color:#637994}
+.question{
+ padding:14px;background:#f0f6ff;
+ border-radius:14px;margin:12px 0
 }
-function loadParticipant(){
-try{
-let encoded=location.hash.split("#play=")[1];
-if(!encoded)return false;
-quiz=JSON.parse(decodeURIComponent(escape(atob(encoded))));
-document.getElementById("participantTitle").textContent=quiz.title;
-document.getElementById("madeBy").textContent="Creado por "+quiz.creator;
-let box=document.getElementById("answerQuestions");
-box.innerHTML="";
-quiz.questions.forEach((q,i)=>{
-let d=document.createElement("div");d.className="question";
-let title=document.createElement("h3");title.textContent=(i+1)+". "+q.text;d.appendChild(title);
-q.answers.forEach((a,n)=>{
-let label=document.createElement("label");label.className="option";
-let radio=document.createElement("input");radio.type="radio";radio.name="ans"+i;radio.value=n;
-label.append(radio,document.createTextNode(a));d.appendChild(label);
-});
-box.appendChild(d);
-});
-show("participant");return true;
-}catch(e){alert("No se pudo abrir este quiz.");return false;}
-}
-function submitAnswers(){
-let name=document.getElementById("playerName").value.trim();
-let bias=document.getElementById("bias").value;
-if(!name||!bias){alert("Escribe tu nombre y elige tu bias.");return;}
-let score=0;
-for(let i=0;i<quiz.questions.length;i++){
-let selected=document.querySelector(input[name="ans${i}"]:checked);
-if(!selected){alert("Responde todas las preguntas.");return;}
-if(Number(selected.value)===quiz.questions[i].correct)score++;
-}
-document.getElementById("scoreArea").innerHTML="";
-let result=document.createElement("h3");
-result.textContent=${name}, obtuviste ${score} de ${quiz.questions.length} puntos.;
-document.getElementById("scoreArea").appendChild(result);
-let info=document.createElement("p");info.textContent="Bias: "+bias;
-document.getElementById("scoreArea").appendChild(info);
-let note=document.createElement("small");note.textContent="La puntuación se muestra en este dispositivo. El panel privado y el guardado en línea se configurarán después.";
-document.getElementById("scoreArea").appendChild(note);
-}
-function goHome(){location.hash="";show("home");}
-if(location.hash.startsWith("#play="))loadParticipant();
-</script>
+.option{display:block;padding:8px;margin:5px 0;
+ background:#fff;border:1px solid #d6e5f8;border-radius:9px}
+.option input{width:auto;margin:0 8px 0 0}
+hr{border:0;border-top:1px solid #dce8f6;margin:18px 0}
+#message{white-space:pre-wrap;overflow-wrap:anywhere}
+a{color:#356eaf;overflow-wrap:anywhere}
+footer{text-align:center;padding:20px;color:#69809c}
+</style>
+</head>
+<body>
+<header>
+<h1>💙 Knowledge Quiz 💙</h1>
+<p>Crea, comparte y descubre cuánto te conocen tus amigos.</p>
+</header>
 
-</body>  
-  </html>
+<main>
+<section id="home" class="card">
+<h2>¡Bienvenido!</h2>
+<p>Crea tu propio cuestionario o responde el de alguien más.</p>
+<button onclick="show('creator')">✨ Crear mi quiz</button>
+<button class="secondary" onclick="show('results')">🏆 Resultados</button>
+<hr>
+<h3>¿Tienes un enlace?</h3>
+<p class="small">Abre el enlace que te compartieron para responder el cuestionario.</p>
+</section>
+
+<section id="creator" class="card hidden">
+<h2>✨ Crear cuestionario</h2>
+<label>Tu nombre</label>
+<input id="creatorName" placeholder="¿Cómo te llamas?">
+<label>Nombre del cuestionario</label>
+<input id="quizTitle" placeholder="Ej. ¿Cuánto me conoces?">
+<label>Tema visual</label>
+<select id="theme">
+<option value="blue">Azul cielo 💙</option>
+<option value="pink">Rosa suave 🩷</option>
+<option value="sunset">Atardecer 🌅</option>
+</select>
+<h3>Preguntas</h3>
+<div id="questionEditor"></div>
+<button class="secondary" onclick="addQuestion()">＋ Añadir pregunta</button>
+<button onclick="createQuiz()">Guardar y crear enlace</button>
+<button class="secondary" onclick="goHome()">Volver</button>
+<div id="createdLink"></div>
+</section>
+
+<section id="player" class="card hidden">
+<h2 id="playerTitle">Cuestionario</h2>
+<p id="playerCreator"></p>
+<label>Tu nombre</label>
+<input id="playerName" placeholder="Escribe tu nombre">
+<label>Elige tu bias de BTS</label>
+<select id="bias">
+<option value="">Selecciona tu bias</option>
+<option>RM</option><option>Jin</option><option>SUGA</option>
+<option>j-hope</option><option>Jimin</option>
+<option>V (Taehyung)</option><option>Jungkook</option>
+<option>OT7</option>
+</select>
+<div id="playerQuestions"></div>
+<button id="submitButton" onclick="submitQuiz()">Enviar respuestas 💙</button>
+<button class="secondary" onclick="goHome()">Inicio</button>
+<div id="scoreArea"></div>
+</section>
+
+<section id="results" class="card hidden">
+<h2>🏆 Resultados</h2>
+<p class="small">Escribe el nombre del creador para buscar sus cuestionarios.</p>
+<label>Nombre del creador</label>
+<input id="searchCreator" placeholder="Nombre usado al crear el quiz">
+<button onclick="findQuizzes()">Buscar cuestionarios</button>
+<div id="quizList"></div>
+<button class="secondary" onclick="goHome()">Volver</button>
+</section>
+
+<section id="messageCard" class="card hidden">
+<p id="message"></p>
+<button class="secondary" onclick="goHome()">Volver al inicio</button>
+</section>
+</main>
+
+<footer>Knowledge Quiz · Hecho con 💙</footer>
+
+<script>
+const SUPABASE_URL = "https://wrzsqutqzffhdwdzxxah.supabase.co";
+const SUPABASE_KEY = "sb_publishable_UXr0W1ZwazFZaabGsF8Frw_6MAQPPt6";
+
+const api = SUPABASE_URL + "/rest/v1/";
+let questions = [];
+let activeQuiz = null;
+let busy = false;
+
+async function request(path, options={}) {
+  const response = await fetch(api + path, {
+    ...options,
+    headers: {
+      "apikey": SUPABASE_KEY,
+      "Authorization": "Bearer " + SUPABASE_KEY,
+      "Content-Type": "application/json",
+      ...(options.headers || {})
+    }
+  });
+  const text = await response.text();
+  if (!response.ok) {
+    throw new Error("Error de conexión (" + response.status + "): " + text);
+  }
+  return text ? JSON.parse(text) : null;
+}
+
+function show(id) {
+  ["home","creator","player","results","messageCard"].forEach(x =>
+    document.getElementById(x).classList.add("hidden")
+  );
+  document.getElementById(id).classList.remove("hidden");
+  window.scrollTo(0,0);
+}
+
+function goHome() {
+  history.replaceState(null,"",location.pathname + location.search);
+  show("home");
+}
+
+function escapeHTML(value) {
+  return String(value ?? "").replace(/[&<>"']/g, c => ({
+    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+  })[c]);
+}
+
+function addQuestion() {
+  const i = questions.length;
+  questions.push({prompt:"", options:["","","",""], correct:0});
+  const div = document.createElement("div");
+  div.className = "question";
+  div.id = "editq" + i;
+  div.innerHTML = `
+    <h4>Pregunta ${i+1}</h4>
+    <label>Enunciado</label>
+    <input class="prompt" placeholder="Escribe la pregunta">
+    <label>Opción 1</label><input class="opt" placeholder="Primera opción">
+    <label>Opción 2</label><input class="opt" placeholder="Segunda opción">
+    <label>Opción 3</label><input class="opt" placeholder="Tercera opción">
+    <label>Opción 4</label><input class="opt" placeholder="Cuarta opción">
+    <label>Respuesta correcta</label>
+    <select class="correct">
+      <option value="0">Opción 1</option>
+      <option value="1">Opción 2</option>
+      <option value="2">Opción 3</option>
+      <option value="3">Opción 4</option>
+    </select>`;
+  document.getElementById("questionEditor").appendChild(div);
+}
+
+function collectQuestions() {
+  const list = [...document.querySelectorAll("#questionEditor .question")];
+  return list.map(div => ({
+    prompt: div.querySelector(".prompt").value.trim(),
+    options: [...div.querySelectorAll(".opt")].map(x=>x.value.trim()),
+    correct: Number(div.querySelector(".correct").value)
+  }));
+}
+
+async function createQuiz() {
+  if (busy) return;
+  const creator = document.getElementById("creatorName").value.trim();
+  const title = document.getElementById("quizTitle").value.trim();
+  const qs = collectQuestions();
+
+  if (!creator || !title) return alert("Escribe tu nombre y el título.");
+  if (!qs.length) return alert("Añade al menos una pregunta.");
+  if (qs.some(q => !q.prompt || q.options.some(o=>!o))) {
+    return alert("Completa la pregunta y sus cuatro opciones.");
+  }
+
+  busy = true;
+  try {
+    const created = await request("quizzes",{
+      method:"POST",
+      headers:{"Prefer":"return=representation"},
+      body:JSON.stringify({
+        title,
+        creator_name:creator,
+        questions:qs
+      })
+    });
+    const quiz = created[0];
+    const link = location.origin + location.pathname + "#play=" + quiz.id;
+    document.getElementById("createdLink").innerHTML = `
+      <hr><h3>¡Tu cuestionario está guardado! 💙</h3>
+      <p>Comparte este enlace con tus amigos:</p>
+      <p><a href="${link}">${link}</a></p>
+      <button onclick="copyLink('${link}')">Copiar enlace</button>
+      <button class="secondary" onclick="openQuiz('${quiz.id}')">Probar mi quiz</button>`;
+  } catch(e) {
+    alert("No se pudo guardar el cuestionario.\n\n" + e.message);
+  } finally {busy=false;}
+}
+
+async function copyLink(link) {
+  try {
+    await navigator.clipboard.writeText(link);
+    alert("¡Enlace copiado! 💙");
+  } catch(e) {
+    prompt("Copia este enlace:",link);
+  }
+}
+
+async function openQuiz(id) {
+  try {
+    const data = await request("quizzes?id=eq."+encodeURIComponent(id)+"&select=id,title,creator_name,questions");
+    if (!data.length) throw new Error("No encontramos ese cuestionario.");
+    activeQuiz = data[0];
+    if (!Array.isArray(activeQuiz.questions) || !activeQuiz.questions.length) {
+      throw new Error("Este cuestionario no tiene preguntas.");
+    }
+    document.getElementById("playerTitle").textContent = activeQuiz.title;
+    document.getElementById("playerCreator").textContent = "Creado por " + activeQuiz.creator_name;
+    document.getElementById("playerName").value = "";
+    document.getElementById("bias").value = "";
+    document.getElementById("scoreArea").innerHTML = "";
+    document.getElementById("submitButton").disabled = false;
+
+    document.getElementById("playerQuestions").innerHTML =
+      activeQuiz.questions.map((q,i)=>`
+        <div class="question">
+          <h3>${i+1}. ${escapeHTML(q.prompt)}</h3>
+          ${q.options.map((o,j)=>`
+            <label class="option">
+              <input type="radio" name="answer${i}" value="${j}">
+              ${escapeHTML(o)}
+            </label>`).join("")}
+        </div>`).join("");
+
+    history.replaceState(null,"",location.pathname+location.search+"#play="+id);
+    show("player");
+  } catch(e) {
+    document.getElementById("message").textContent = e.message;
+    show("messageCard");
+  }
+}
+
+async function submitQuiz() {
+  if (!activeQuiz || busy) return;
+  const name = document.getElementById("playerName").value.trim();
+  const bias = document.getElementById("bias").value;
+  if (!name || !bias) return alert("Escribe tu nombre y elige tu bias.");
+
+  const qs = activeQuiz.questions;
+  const answers = [];
+  for (let i=0;i<qs.length;i++) {
+    const selected = document.querySelector('input[name="answer'+i+'"]:checked');
+    if (!selected) return alert("Responde todas las preguntas antes de enviar.");
+    answers.push(Number(selected.value));
+  }
+
+  const score = answers.reduce((sum,a,i)=>sum+(a===Number(qs[i].correct)?1:0),0);
+  busy=true;
+  document.getElementById("submitButton").disabled=true;
+
+  try {
+    await request("quiz_results",{
+      method:"POST",
+      headers:{"Prefer":"return=minimal"},
+      body:JSON.stringify({
+        quiz_id:activeQuiz.id,
+        player_name:name,
+        bias,
+        score,
+        total_questions:qs.length
+      })
+    });
+    document.getElementById("scoreArea").innerHTML = `
+      <hr><h2>¡Terminaste, ${escapeHTML(name)}! 💙</h2>
+      <h3>Tu puntuación: ${score} de ${qs.length}</h3>
+      <p>${score===qs.length?"¡Perfecto! Conocías todas las respuestas.":score===0?"¡Sigue aprendiendo!":"¡Gracias por participar!"}</p>
+      <button onclick="showLeaderboard('${activeQuiz.id}')">🏆 Ver clasificación</button>`;
+  } catch(e) {
+    alert("No se pudo guardar tu puntuación.\n\n"+e.message);
+    document.getElementById("submitButton").disabled=false;
+  } finally {busy=false;}
+}
+
+async function showLeaderboard(id) {
+  try {
+    const quizData = await request("quizzes?id=eq."+encodeURIComponent(id)+"&select=id,title");
+    const rows = await request("quiz_results?quiz_id=eq."+encodeURIComponent(id)+"&select=player_name,bias,score,total_questions,created_at&order=score.desc,created_at.asc");
+    document.getElementById("quizList").innerHTML =
+      `<h3>${escapeHTML(quizData[0]?.title || "Clasificación")}</h3>` +
+      (rows.length ? rows.map((r,i)=>`
+        <div class="question">
+          <b>${i+1}. ${escapeHTML(r.player_name)}</b><br>
+          Bias: ${escapeHTML(r.bias)}<br>
+          Puntuación: ${r.score}/${r.total_questions}
+        </div>`).join("") : "<p>Aún no hay puntuaciones.</p>");
+    show("results");
+  } catch(e) {alert("No se pudieron cargar los resultados.\n"+e.message);}
+}
+
+async function findQuizzes() {
+  const name = document.getElementById("searchCreator").value.trim();
+  if (!name) return alert("Escribe el nombre del creador.");
+  try {
+    const data = await request("quizzes?creator_name=eq."+encodeURIComponent(name)+"&select=id,title,created_at&order=created_at.desc");
+    const box = document.getElementById("quizList");
+    if (!data.length) {
+      box.innerHTML="<p>No encontramos cuestionarios con ese nombre.</p>";
+    } else {
+      box.innerHTML=data.map(q=>`
+        <div class="question">
+          <h3>${escapeHTML(q.title)}</h3>
+          <button onclick="showLeaderboard('${q.id}')">Ver clasificación</button>
+          <button class="secondary" onclick="openQuiz('${q.id}')">Abrir quiz</button>
+        </div>`).join("");
+    }
+  } catch(e) {alert("No se pudo buscar.\n"+e.message);}
+}
+
+function init() {
+  if (questions.length===0) addQuestion();
+  const match = location.hash.match(/^#play=([0-9a-f-]+)$/i);
+  if (match) openQuiz(match[1]);
+}
+init();
+</script>
+</body>
+</html>
