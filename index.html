@@ -1,0 +1,168 @@
+<!DOCTYPE html>  <html lang="es">  
+<head>  
+<meta charset="UTF-8">  
+<meta name="viewport" content="width=device-width, initial-scale=1">  
+<title>Knowledge Quiz</title>  
+<style>  
+*{box-sizing:border-box}  
+body{margin:0;font-family:Arial,sans-serif;color:#263b58;background:linear-gradient(#dceeff,#f7faff);min-height:100vh}  
+header{text-align:center;padding:35px 16px;background:linear-gradient(145deg,#9bc7ee,#d9eaff)}  
+h1{margin:0;font-size:32px}  
+header p{margin-bottom:0}  
+main{max-width:650px;margin:24px auto;padding:0 14px}  
+.card{background:#ffffffed;border:1px solid #d3e4f7;border-radius:22px;padding:22px;margin-bottom:18px;box-shadow:0 8px 25px #7197b51c}  
+h2{margin-top:0}  
+label{display:block;margin:14px 0 6px;font-weight:bold}  
+input,textarea,select{width:100%;padding:12px;border:1px solid #c4d8ed;border-radius:11px;font-size:16px;background:white}  
+button{border:0;border-radius:12px;padding:13px 17px;background:#527fb8;color:white;font-weight:bold;font-size:15px;margin-top:14px;cursor:pointer}  
+button.secondary{background:#e4effc;color:#345d8e}  
+.option{display:block;padding:10px;background:#eef5fd;border-radius:10px;margin:8px 0;font-weight:normal}  
+.option input{width:auto;margin-right:8px}  
+.question{border-top:1px solid #dce8f5;margin-top:18px;padding-top:12px}  
+small{color:#627d9b}  
+.hidden{display:none}  
+</style>  
+</head>  
+<body>  
+<header>  
+  <h1>☁️ Knowledge Quiz</h1>  
+  <p>¿A ver qué tanto te conocen? 💙</p>  
+</header>  
+<main>  
+  <section class="card" id="home">  
+    <h2>🌸 Crea tu propio quiz</h2>  
+    <p>Prepara preguntas, comparte tu quiz y reta a tus amigos.</p>  
+    <label>Tu nombre</label>  
+    <input id="creator" placeholder="¿Cómo te llamas?">  
+    <label>Nombre del quiz</label>  
+    <input id="quizTitle" placeholder="¿Qué tanto me conocen?">  
+    <label>Decoración</label>  
+    <select id="theme">  
+      <option value="blue">Cielo azul</option>  
+      <option value="pink">Cerezo rosado</option>  
+      <option value="sunset">Atardecer</option>  
+    </select>  
+    <button onclick="startCreator()">Crear preguntas</button>  
+  </section>    <section class="card hidden" id="editor">  
+    <h2 id="editorTitle">Mis preguntas</h2>  
+    <small>Máximo 15 preguntas. Marca la respuesta correcta.</small>  
+    <div id="questions"></div>  
+    <button class="secondary" onclick="addQuestion()">＋ Añadir pregunta</button>  
+    <button onclick="makeLink()">Crear enlace para compartir</button>  
+    <div id="shareArea"></div>  
+    <button class="secondary" onclick="goHome()">Volver al inicio</button>  
+  </section>    <section class="card hidden" id="participant">  
+    <h2 id="participantTitle">¡A responder!</h2>  
+    <p id="madeBy"></p>  
+    <label>Tu nombre</label>  
+    <input id="playerName" placeholder="Escribe tu nombre">  
+    <label>Tu bias de BTS</label>  
+    <select id="bias">  
+      <option value="">Elige tu bias</option>  
+      <option>RM</option><option>Jin</option><option>SUGA</option>  
+      <option>j-hope</option><option>Jimin</option>  
+      <option>V</option><option>Jungkook</option>  
+    </select>  
+    <div id="answerQuestions"></div>  
+    <button onclick="submitAnswers()">Ver mi puntuación</button>  
+    <div id="scoreArea"></div>  
+  </section>  
+</main>  
+<script>  
+let quiz={creator:"",title:"",theme:"blue",questions:[]};  
+let currentQuestions=[];  function show(id){
+["home","editor","participant"].forEach(x=>
+document.getElementById(x).classList.toggle("hidden",x!==id));
+}
+function startCreator(){
+quiz.creator=document.getElementById("creator").value.trim();
+quiz.title=document.getElementById("quizTitle").value.trim();
+quiz.theme=document.getElementById("theme").value;
+if(!quiz.creator||!quiz.title){alert("Escribe tu nombre y el título del quiz.");return;}
+quiz.questions=[];
+document.getElementById("editorTitle").textContent=quiz.title;
+document.getElementById("questions").innerHTML="";
+document.getElementById("shareArea").innerHTML="";
+addQuestion();
+addQuestion();
+show("editor");
+}
+function addQuestion(){
+if(quiz.questions.length>=15){alert("El máximo es 15 preguntas.");return;}
+let i=quiz.questions.length;
+quiz.questions.push({text:"",answers:["","","",""],correct:0});
+let div=document.createElement("div");
+div.className="question";
+div.id="q"+i;
+div.innerHTML=<h3>Pregunta ${i+1}</h3>   <label>Escribe la pregunta</label>   <input id="qt${i}" placeholder="Tu pregunta...">   ${[0,1,2,3].map(n=><label>Respuesta ${n+1}</label>
+<input id="qa${i}_${n}" placeholder="Escribe una respuesta">).join("")}   <label>Respuesta correcta</label>   <select id="qc${i}"><option value="0">Respuesta 1</option><option value="1">Respuesta 2</option><option value="2">Respuesta 3</option><option value="3">Respuesta 4</option></select>;
+document.getElementById("questions").appendChild(div);
+}
+function collectQuiz(){
+quiz.questions=quiz.questions.map((q,i)=>({
+text:document.getElementById("qt"+i).value.trim(),
+answers:[0,1,2,3].map(n=>document.getElementById(qa${i}_${n}).value.trim()),
+correct:Number(document.getElementById("qc"+i).value)
+}));
+return quiz.questions.every(q=>q.text&&q.answers.every(a=>a));
+}
+function makeLink(){
+if(!collectQuiz()){alert("Completa todas las preguntas y sus cuatro respuestas.");return;}
+let encoded=btoa(unescape(encodeURIComponent(JSON.stringify(quiz))));
+let url=location.href.split("#")[0]+"#play="+encoded;
+document.getElementById("shareArea").innerHTML=
+<p>Tu enlace para compartir:</p><input id="shareLink" readonly value="${url}"><button onclick="copyLink()">Copiar enlace</button><p><small>Esta primera versión genera el enlace, pero todavía no guarda respuestas en línea.</small></p>;
+}
+function copyLink(){
+let field=document.getElementById("shareLink");
+field.select();
+if(navigator.clipboard){navigator.clipboard.writeText(field.value).then(()=>alert("¡Enlace copiado!")).catch(()=>alert("Mantén pulsado el enlace para copiarlo."));}
+else alert("Mantén pulsado el enlace para copiarlo.");
+}
+function loadParticipant(){
+try{
+let encoded=location.hash.split("#play=")[1];
+if(!encoded)return false;
+quiz=JSON.parse(decodeURIComponent(escape(atob(encoded))));
+document.getElementById("participantTitle").textContent=quiz.title;
+document.getElementById("madeBy").textContent="Creado por "+quiz.creator;
+let box=document.getElementById("answerQuestions");
+box.innerHTML="";
+quiz.questions.forEach((q,i)=>{
+let d=document.createElement("div");d.className="question";
+let title=document.createElement("h3");title.textContent=(i+1)+". "+q.text;d.appendChild(title);
+q.answers.forEach((a,n)=>{
+let label=document.createElement("label");label.className="option";
+let radio=document.createElement("input");radio.type="radio";radio.name="ans"+i;radio.value=n;
+label.append(radio,document.createTextNode(a));d.appendChild(label);
+});
+box.appendChild(d);
+});
+show("participant");return true;
+}catch(e){alert("No se pudo abrir este quiz.");return false;}
+}
+function submitAnswers(){
+let name=document.getElementById("playerName").value.trim();
+let bias=document.getElementById("bias").value;
+if(!name||!bias){alert("Escribe tu nombre y elige tu bias.");return;}
+let score=0;
+for(let i=0;i<quiz.questions.length;i++){
+let selected=document.querySelector(input[name="ans${i}"]:checked);
+if(!selected){alert("Responde todas las preguntas.");return;}
+if(Number(selected.value)===quiz.questions[i].correct)score++;
+}
+document.getElementById("scoreArea").innerHTML="";
+let result=document.createElement("h3");
+result.textContent=${name}, obtuviste ${score} de ${quiz.questions.length} puntos.;
+document.getElementById("scoreArea").appendChild(result);
+let info=document.createElement("p");info.textContent="Bias: "+bias;
+document.getElementById("scoreArea").appendChild(info);
+let note=document.createElement("small");note.textContent="La puntuación se muestra en este dispositivo. El panel privado y el guardado en línea se configurarán después.";
+document.getElementById("scoreArea").appendChild(note);
+}
+function goHome(){location.hash="";show("home");}
+if(location.hash.startsWith("#play="))loadParticipant();
+</script>
+
+</body>  
+  </html>
