@@ -205,39 +205,62 @@ function collectQuestions() {
 
 async function createQuiz() {
   if (busy) return;
+
   const creator = document.getElementById("creatorName").value.trim();
   const title = document.getElementById("quizTitle").value.trim();
   const qs = collectQuestions();
 
-  if (!creator || !title) return alert("Escribe tu nombre y el título.");
-  if (!qs.length) return alert("Añade al menos una pregunta.");
-  if (qs.some(q => !q.prompt || q.options.some(o=>!o))) {
+  if (!creator || !title) {
+    return alert("Escribe tu nombre y el título.");
+  }
+
+  if (!qs.length) {
+    return alert("Añade al menos una pregunta.");
+  }
+
+  if (qs.some(q => !q.prompt || q.options.some(o => !o))) {
     return alert("Completa la pregunta y sus cuatro opciones.");
   }
 
   busy = true;
+
   try {
-    const created = await request("quizzes",{
-      method:"POST",
-      headers:{"Prefer":"return=representation"},
-      body:JSON.stringify({
-        title,
-        creator_name:creator,
-        questions:qs
+    const quizId = await request("rpc/create_quiz", {
+      method: "POST",
+      body: JSON.stringify({
+        p_title: title,
+        p_creator_name: creator,
+        p_questions: qs.map(q => ({
+          prompt: q.prompt,
+          options: q.options
+        })),
+        p_answer_key: qs.map(q => q.correct)
       })
     });
-    const quiz = created[0];
-    const link = location.origin + location.pathname + "#play=" + quiz.id;
+
+    const id = typeof quizId === "string"
+      ? quizId
+      : quizId?.create_quiz;
+
+    if (!id) {
+      throw new Error("No recibimos el enlace del cuestionario.");
+    }
+
+    const link = location.origin + location.pathname + "#play=" + id;
+
     document.getElementById("createdLink").innerHTML = `
-      <hr><h3>¡Tu cuestionario está guardado! 💙</h3>
+      <hr>
+      <h3>¡Tu cuestionario está guardado! 💙</h3>
       <p>Comparte este enlace con tus amigos:</p>
       <p><a href="${link}">${link}</a></p>
       <button onclick="copyLink('${link}')">Copiar enlace</button>
-      <button class="secondary" onclick="openQuiz('${quiz.id}')">Probar mi quiz</button>`;
-  } catch(e) {
+      <button class="secondary" onclick="openQuiz('${id}')">Probar mi quiz</button>`;
+  } catch (e) {
     alert("No se pudo guardar el cuestionario.\n\n" + e.message);
-  } finally {busy=false;}
-}
+  } finally {
+    busy = false;
+  }
+ }
 
 async function copyLink(link) {
   try {
