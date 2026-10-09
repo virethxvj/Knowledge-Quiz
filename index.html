@@ -307,43 +307,69 @@ async function openQuiz(id) {
 
 async function submitQuiz() {
   if (!activeQuiz || busy) return;
+
   const name = document.getElementById("playerName").value.trim();
   const bias = document.getElementById("bias").value;
-  if (!name || !bias) return alert("Escribe tu nombre y elige tu bias.");
+
+  if (!name || !bias) {
+    return alert("Escribe tu nombre y elige tu bias.");
+  }
 
   const qs = activeQuiz.questions;
   const answers = [];
-  for (let i=0;i<qs.length;i++) {
-    const selected = document.querySelector('input[name="answer'+i+'"]:checked');
-    if (!selected) return alert("Responde todas las preguntas antes de enviar.");
+
+  for (let i = 0; i < qs.length; i++) {
+    const selected = document.querySelector(
+      'input[name="answer' + i + '"]:checked'
+    );
+
+    if (!selected) {
+      return alert("Responde todas las preguntas antes de enviar.");
+    }
+
     answers.push(Number(selected.value));
   }
 
-  const score = answers.reduce((sum,a,i)=>sum+(a===Number(qs[i].correct)?1:0),0);
-  busy=true;
-  document.getElementById("submitButton").disabled=true;
+  busy = true;
+  document.getElementById("submitButton").disabled = true;
 
   try {
-    await request("quiz_results",{
-      method:"POST",
-      headers:{"Prefer":"return=minimal"},
-      body:JSON.stringify({
-        quiz_id:activeQuiz.id,
-        player_name:name,
-        bias,
-        score,
-        total_questions:qs.length
+    const result = await request("rpc/submit_quiz", {
+      method: "POST",
+      body: JSON.stringify({
+        p_quiz_id: activeQuiz.id,
+        p_player_name: name,
+        p_bias: bias,
+        p_answers: answers
       })
     });
+
+    const score = Number(result.score);
+    const total = Number(result.total_questions);
+
     document.getElementById("scoreArea").innerHTML = `
-      <hr><h2>¡Terminaste, ${escapeHTML(name)}! 💙</h2>
-      <h3>Tu puntuación: ${score} de ${qs.length}</h3>
-      <p>${score===qs.length?"¡Perfecto! Conocías todas las respuestas.":score===0?"¡Sigue aprendiendo!":"¡Gracias por participar!"}</p>
-      <button onclick="showLeaderboard('${activeQuiz.id}')">🏆 Ver clasificación</button>`;
-  } catch(e) {
-    alert("No se pudo guardar tu puntuación.\n\n"+e.message);
-    document.getElementById("submitButton").disabled=false;
-  } finally {busy=false;}
+      <hr>
+      <h2>¡Terminaste, ${escapeHTML(name)}! 💙</h2>
+      <h3>Tu puntuación: ${score} de ${total}</h3>
+      <p>${
+        score === total
+          ? "¡Perfecto! Conocías todas las respuestas."
+          : score === 0
+            ? "¡Sigue aprendiendo!"
+            : "¡Gracias por participar!"
+      }</p>
+      <button id="leaderboardButton">🏆 Ver clasificación</button>
+    `;
+
+    document.getElementById("leaderboardButton").onclick =
+      () => showLeaderboard(activeQuiz.id);
+
+  } catch (e) {
+    alert("No se pudo guardar tu puntuación.\n\n" + e.message);
+    document.getElementById("submitButton").disabled = false;
+  } finally {
+    busy = false;
+  }
 }
 
 async function showLeaderboard(id) {
